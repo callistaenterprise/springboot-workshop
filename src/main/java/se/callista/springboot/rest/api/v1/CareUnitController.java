@@ -24,28 +24,28 @@ public class CareUnitController {
     CareUnitService careUnitService;
 
     @RequestMapping(value = "/careunit", method = RequestMethod.GET)
-    public ResponseEntity<List<CareUnitJPA>> listCareunits()
+    public ResponseEntity<List<CareUnit>> listCareunits()
     {
-        List<CareUnitJPA> careunits = careUnitService.findAll();
+        List<CareUnit> careunits = careUnitService.findAll();
         return new ResponseEntity<>(careunits, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/careunit/{id}", method = RequestMethod.GET)
-    public ResponseEntity<CareUnitJPA> getOneCareunit(@PathVariable( "id" ) Long id) {
-        CareUnitJPA careunit = careUnitService.findOne(id);
+    public ResponseEntity<CareUnit> getOneCareunit(@PathVariable( "id" ) Long id) {
+        CareUnit careunit = careUnitService.findOne(id);
         return new ResponseEntity<>(careunit, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/careunit", method = RequestMethod.POST)
-    public ResponseEntity<CareUnitJPA> createCareunit(@RequestBody CareUnitJPA careunit,
+    public ResponseEntity<CareUnit> createCareunit(@RequestBody CareUnit careunit,
                                                       @RequestParam(value = "hospitalId", required = true) Long hospitalId) {
-        CareUnitJPA savedCareunit = careUnitService.save(hospitalId, careunit);
+        CareUnit savedCareunit = careUnitService.save(hospitalId, careunit);
         return new ResponseEntity<>(savedCareunit, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/careunit/{id}", method = RequestMethod.PUT)
     public ResponseEntity updateCareunit(@PathVariable( "id" ) Long id,
-                                        @RequestBody CareUnitJPA careunit) {
+                                        @RequestBody CareUnit careunit) {
         careUnitService.update(careunit);
         return new ResponseEntity(HttpStatus.OK);
     }

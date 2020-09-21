@@ -2,8 +2,9 @@ package se.callista.springboot.rest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import se.callista.springboot.rest.api.v1.Bed;
+import se.callista.springboot.rest.api.v1.Hospital;
 import se.callista.springboot.rest.domain.BedJPA;
-import se.callista.springboot.rest.domain.BedRepository;
 import se.callista.springboot.rest.domain.HospitalJPA;
 import se.callista.springboot.rest.domain.HospitalRepository;
 
@@ -17,22 +18,38 @@ public class HospitalService {
     @Autowired
     HospitalRepository hospitalRepository;
 
-    public List<HospitalJPA> findAll() {
+    @Autowired
+    HospitalMapper hospitalMapper;
+
+    public List<Hospital> findAll() {
         List<HospitalJPA> hospitals = StreamSupport.stream(hospitalRepository.findAll().spliterator(),false).collect(Collectors.toList());
-        return hospitals;
+
+        //Transform to DTO's
+        List<Hospital> returnHospitals = hospitalMapper.toListDTOs(hospitals);
+
+        return returnHospitals;
     }
 
-    public HospitalJPA findOne(long id) {
+    public Hospital findOne(long id) {
         HospitalJPA hospital = hospitalRepository.findById(id).orElse(null);
-        return hospital;
+        return hospitalMapper.toDTO(hospital);
     }
 
-    public HospitalJPA save(HospitalJPA hospital) {
-        return hospitalRepository.save(hospital);
+    public Hospital save(Hospital hospital) {
+        // Transform from DTO
+        HospitalJPA hospitalJPA = hospitalMapper.fromDTO(hospital);
+
+        HospitalJPA savedHospitalJPA = hospitalRepository.save(hospitalJPA);
+
+        //Transform to DTO
+        return hospitalMapper.toDTO(savedHospitalJPA);
     }
 
-    public void update(HospitalJPA hospital) {
-        hospitalRepository.save(hospital);
+    public void update(Hospital hospital) {
+        // Transform from DTO
+        HospitalJPA hospitalJPA = hospitalMapper.fromDTO(hospital);
+
+        hospitalRepository.save(hospitalJPA);
     }
 
     public void delete(Long id) {

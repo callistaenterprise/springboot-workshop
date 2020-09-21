@@ -2,11 +2,11 @@ package se.callista.springboot.rest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import se.callista.springboot.rest.api.v1.Bed;
 import se.callista.springboot.rest.domain.BedJPA;
 import se.callista.springboot.rest.domain.BedRepository;
 import se.callista.springboot.rest.domain.CareUnitJPA;
 import se.callista.springboot.rest.domain.CareUnitRepository;
-import se.callista.springboot.rest.domain.HospitalJPA;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,30 +21,45 @@ public class BedService {
     @Autowired
     CareUnitRepository careUnitRepository;
 
-    public List<BedJPA> findAll() {
+    @Autowired
+    private BedMapper bedMapper;
+
+    public List<Bed> findAll() {
         List<BedJPA> beds = StreamSupport.stream(bedRepository.findAll().spliterator(),false).collect(Collectors.toList());
-        return beds;
+
+        //Transform to DTO's
+        List<Bed> returnBeds = bedMapper.toListDTOs(beds);
+
+        return returnBeds;
     }
 
-    public BedJPA findOne(long id) {
+    public Bed findOne(long id) {
         BedJPA bed = bedRepository.findById(id).orElse(null);
-        return bed;
+        return bedMapper.toDTO(bed);
     }
 
-    public BedJPA save(Long careunitId, BedJPA bed) {
+    public Bed save(Long careunitId, Bed bed) {
+        // Transform from DTO
+        BedJPA bedJPA = bedMapper.fromDTO(bed);
+
         CareUnitJPA careunit = careUnitRepository.findById(careunitId).orElse(null);
-        bed.setCareunit(careunit);
+        bedJPA.setCareunit(careunit);
 
-        return bedRepository.save(bed);
+        BedJPA savedBedJPA = bedRepository.save(bedJPA);
+
+        //Transform to DTO
+        return bedMapper.toDTO(savedBedJPA);
     }
 
-    public void update(BedJPA bed) {
-        bedRepository.save(bed);
+    public void update(Bed bed) {
+        // Transform from DTO
+        BedJPA bedJPA = bedMapper.fromDTO(bed);
+
+        bedRepository.save(bedJPA);
     }
 
     public void delete(Long id) {
         bedRepository.deleteById(id);
     }
-
 
 }

@@ -22,28 +22,28 @@ public class BedController {
     BedService bedService;
 
     @RequestMapping(value = "/bed", method = RequestMethod.GET)
-    public ResponseEntity<List<BedJPA>> listBeds()
+    public ResponseEntity<List<Bed>> listBeds()
     {
-        List<BedJPA> devices = bedService.findAll();
+        List<Bed> devices = bedService.findAll();
         return new ResponseEntity<>(devices, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/bed/{id}", method = RequestMethod.GET)
-    public ResponseEntity<BedJPA> getOneBed(@PathVariable( "id" ) Long id) {
-        BedJPA bed = bedService.findOne(id);
+    public ResponseEntity<Bed> getOneBed(@PathVariable( "id" ) Long id) {
+        Bed bed = bedService.findOne(id);
         return new ResponseEntity<>(bed, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/bed", method = RequestMethod.POST)
-    public ResponseEntity<BedJPA> createBed(@RequestBody BedJPA bed,
+    public ResponseEntity<Bed> createBed(@RequestBody Bed bed,
                                             @RequestParam(value = "careunitId", required = true) Long careunitId) {
-        BedJPA savedBed = bedService.save(careunitId, bed);
+        Bed savedBed = bedService.save(careunitId, bed);
         return new ResponseEntity<>(savedBed, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/bed/{id}", method = RequestMethod.PUT)
     public ResponseEntity updateBed(@PathVariable( "id" ) Long id,
-                                       @RequestBody BedJPA bed) {
+                                       @RequestBody Bed bed) {
         bedService.update(bed);
         return new ResponseEntity(HttpStatus.OK);
     }

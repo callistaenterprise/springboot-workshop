@@ -75,4 +75,11 @@ We have set a property to make the call to make the UI look like swagger.
 ### Simple Tests ###
 We have also added some simple tests for the Hospital controller and service.
 
-1. Test to run the testsuite
+1. Test to run the testsuites in the project
+
+## Step 3 ##
+
+### Introduce DTOs ###
+We don't want to expose database entities in the API-layer. This we solve by introducing DTOs.
+
+Here we will use a mapper tool called MapStruct that maps between entities and DTOs.

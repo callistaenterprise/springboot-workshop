@@ -2,6 +2,10 @@ package se.callista.springboot.rest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import se.callista.springboot.rest.api.v1.Bed;
+import se.callista.springboot.rest.api.v1.CareUnit;
+import se.callista.springboot.rest.api.v1.Hospital;
+import se.callista.springboot.rest.domain.BedJPA;
 import se.callista.springboot.rest.domain.CareUnitJPA;
 import se.callista.springboot.rest.domain.CareUnitRepository;
 import se.callista.springboot.rest.domain.HospitalJPA;
@@ -20,24 +24,41 @@ public class CareUnitService {
     @Autowired
     HospitalRepository hospitalRepository;
 
-    public List<CareUnitJPA> findAll() {
+    @Autowired
+    CareUnitMapper careUnitMapper;
+
+    public List<CareUnit> findAll() {
         List<CareUnitJPA> careunits = StreamSupport.stream(careUnitRepository.findAll().spliterator(),false).collect(Collectors.toList());
-        return careunits;
+
+        //Transform to DTO's
+        List<CareUnit> returnHospitals = careUnitMapper.toListDTOs(careunits);
+
+        return returnHospitals;
     }
 
-    public CareUnitJPA findOne(long id) {
+    public CareUnit findOne(long id) {
         CareUnitJPA careunit = careUnitRepository.findById(id).orElse(null);
-        return careunit;
+        return careUnitMapper.toDTO(careunit);
     }
 
-    public CareUnitJPA save(Long hospitalId, CareUnitJPA careunit) {
+    public CareUnit save(Long hospitalId, CareUnit careunit) {
+        // Transform from DTO
+        CareUnitJPA careunitJPA = careUnitMapper.fromDTO(careunit);
+
         HospitalJPA hospital = hospitalRepository.findById(hospitalId).orElse(null);
-        careunit.setHospital(hospital);
-        return careUnitRepository.save(careunit);
+        careunitJPA.setHospital(hospital);
+
+        CareUnitJPA savedCareunitJPA = careUnitRepository.save(careunitJPA);
+
+        //Transform to DTO
+        return careUnitMapper.toDTO(savedCareunitJPA);
     }
 
-    public void update(CareUnitJPA careunit) {
-        careUnitRepository.save(careunit);
+    public void update(CareUnit careunit) {
+        // Transform from DTO
+        CareUnitJPA careunitJPA = careUnitMapper.fromDTO(careunit);
+
+        careUnitRepository.save(careunitJPA);
     }
 
     public void delete(Long id) {

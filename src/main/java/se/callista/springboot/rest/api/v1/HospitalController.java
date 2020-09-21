@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import se.callista.springboot.rest.domain.CareUnitJPA;
 import se.callista.springboot.rest.domain.HospitalJPA;
 import se.callista.springboot.rest.service.CareUnitService;
+import se.callista.springboot.rest.service.HospitalMapper;
 import se.callista.springboot.rest.service.HospitalService;
 
 import java.util.List;
@@ -24,27 +25,27 @@ public class HospitalController {
     HospitalService hospitalService;
 
     @RequestMapping(value = "/hospital", method = RequestMethod.GET)
-    public ResponseEntity<List<HospitalJPA>> listHospitals()
+    public ResponseEntity<List<Hospital>> listHospitals()
     {
-        List<HospitalJPA> hospitals = hospitalService.findAll();
+        List<Hospital> hospitals = hospitalService.findAll();
         return new ResponseEntity<>(hospitals, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/hospital/{id}", method = RequestMethod.GET)
-    public ResponseEntity<HospitalJPA> getOneHospital(@PathVariable( "id" ) Long id) {
-        HospitalJPA hospital = hospitalService.findOne(id);
+    public ResponseEntity<Hospital> getOneHospital(@PathVariable( "id" ) Long id) {
+        Hospital hospital = hospitalService.findOne(id);
         return new ResponseEntity<>(hospital, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/hospital", method = RequestMethod.POST)
-    public ResponseEntity<HospitalJPA> createHospital(@RequestBody HospitalJPA hospital) {
-        HospitalJPA savedHospital = hospitalService.save(hospital);
+    public ResponseEntity<Hospital> createHospital(@RequestBody Hospital hospital) {
+        Hospital savedHospital = hospitalService.save(hospital);
         return new ResponseEntity<>(savedHospital, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/hospital/{id}", method = RequestMethod.PUT)
     public ResponseEntity updateHospital(@PathVariable( "id" ) Long id,
-                                         @RequestBody HospitalJPA hospital) {
+                                         @RequestBody Hospital hospital) {
         hospitalService.update(hospital);
         return new ResponseEntity(HttpStatus.OK);
     }

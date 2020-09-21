@@ -16,8 +16,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.util.UriComponentsBuilder;
+import se.callista.springboot.rest.api.v1.Hospital;
 import se.callista.springboot.rest.domain.HospitalJPA;
 import se.callista.springboot.rest.domain.HospitalRepository;
+import se.callista.springboot.rest.service.HospitalMapper;
 
 import java.net.URI;
 import java.util.List;
@@ -37,6 +39,9 @@ public class HospitalIntegrationTest {
     @Autowired
     private HospitalRepository hospitalRepository;
 
+    @Autowired
+    HospitalMapper hospitalMapper;
+
     @BeforeEach
     public void removeAnyLoadedData(){
         hospitalRepository.deleteAll();
@@ -48,12 +53,12 @@ public class HospitalIntegrationTest {
         HospitalJPA hospital1 = insertOneHospital();
 
         // Set values and make call
-        ParameterizedTypeReference<List<HospitalJPA>> ptr =
+        ParameterizedTypeReference<List<Hospital>> ptr =
                 new ParameterizedTypeReference<>() { };
         URI targetUrl = UriComponentsBuilder.fromUriString("/api/v1/hospital")
                 .build()
                 .toUri();
-        ResponseEntity<List<HospitalJPA>> hospitals = template.exchange(targetUrl, HttpMethod.GET, null, ptr);
+        ResponseEntity<List<Hospital>> hospitals = template.exchange(targetUrl, HttpMethod.GET, null, ptr);
 
         // Assert
         assertEquals(HttpStatus.OK.value(), hospitals.getStatusCodeValue());
@@ -64,7 +69,7 @@ public class HospitalIntegrationTest {
     @Test
     public void testCreateOne() {
         // Create hospital values
-        HospitalJPA hospital1 = new HospitalJPA("SÄS", "Vänersborg");
+        Hospital hospital1 = new Hospital("SÄS", "Vänersborg");
 
         // Set values and make call
         URI targetUrl = UriComponentsBuilder.fromUriString("/api/v1/hospital")
@@ -72,8 +77,8 @@ public class HospitalIntegrationTest {
                 .toUri();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<HospitalJPA> entity = new HttpEntity<>(hospital1, headers);
-        ResponseEntity<HospitalJPA> response = template.exchange(targetUrl, HttpMethod.POST, entity, HospitalJPA.class);
+        HttpEntity<Hospital> entity = new HttpEntity<>(hospital1, headers);
+        ResponseEntity<Hospital> response = template.exchange(targetUrl, HttpMethod.POST, entity, Hospital.class);
 
         // Assert
         assertEquals(HttpStatus.OK.value(), response.getStatusCodeValue());
@@ -94,9 +99,13 @@ public class HospitalIntegrationTest {
                 .toUri();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        hospital1.setName("Another");
-        HttpEntity<HospitalJPA> entity = new HttpEntity<>(hospital1, headers);
-        ResponseEntity response = template.exchange(targetUrl, HttpMethod.PUT, entity, HospitalJPA.class);
+
+        // Create updated hospital object
+        Hospital hospitalToUpdate = hospitalMapper.toDTO(hospital1);
+        hospitalToUpdate.setName("Another");
+
+        HttpEntity<Hospital> entity = new HttpEntity<>(hospitalToUpdate, headers);
+        ResponseEntity response = template.exchange(targetUrl, HttpMethod.PUT, entity, Hospital.class);
 
         // Assert OK
         assertEquals(HttpStatus.OK.value(), response.getStatusCodeValue());
@@ -118,7 +127,7 @@ public class HospitalIntegrationTest {
                 .build()
                 .toUri();
 
-        ResponseEntity response = template.exchange(targetUrl, HttpMethod.DELETE, null, HospitalJPA.class);
+        ResponseEntity response = template.exchange(targetUrl, HttpMethod.DELETE, null, Hospital.class);
 
         // Assert
         assertEquals(HttpStatus.OK.value(), response.getStatusCodeValue());
