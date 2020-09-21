@@ -118,6 +118,37 @@ We have also added some new tests that will catch different errors.
 
 1. Test to run the application and omit data or enter wrong data to see the errors in the responses.
 
+## Step 6 ##
+Here we add Paging and sorting together with some search capabilities.
+
+#### Paging and Sorting ####
+To be able to return pages of results we extend our repository with PagingAndSortingRepository<HospitalJPA, Long>.
+
+1. Try it out with the web-browser, use the example profile!
+
+#### Searching with Specification ####
+To be able to search in a dynamic way we can use Spring Data Specification. We will extend our REST interface for Hospital API:s with non-required parameters that we can search with.
+
+These are encapsulated in a Criteria that defines the search parameters. With this as input we will create a Specification for searching customers.
+
+The specification is built by adding pieces of smaller specifications for each search field defined in the domain object HospitalJPA.
+
+The Repository will be extended to include the JpaSpecificationExecutor<HospitalJPA> that will enable searching by a specification. 
+
+1. Try to search for a specific hospital by name
+
+#### Searching with QueryDSL ####
+You can also search by adding QueryDSL dependencies.
+
+You then extend your repository with QuerydslPredicateExecutor<CareUnitJPA>.
+
+We still encapsulate the search criteria and use this criteria to build a Predicate by using generated Qxxx classes.
+
+See CareUnitService, buildPredicate method.
+
+For more information see
+https://www.baeldung.com/rest-search-language-spring-jpa-criteria
+
 
 
 

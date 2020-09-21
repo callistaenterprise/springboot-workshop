@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
+import se.callista.springboot.rest.api.v1.Hospital;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -40,4 +42,13 @@ public class HospitalJPA {
         this.name = name;
         this.address = address;
     }
+
+    public static Specification<HospitalJPA> nameContains(String name) {
+        return name == null ? null :(ie, cq, cb) -> cb.like(ie.get("name"), "%" + name + "%");
+    }
+
+    public static Specification<HospitalJPA> addressContains(String address) {
+        return address == null ? null :(ie, cq, cb) -> cb.like(ie.get("address"), "%" + address + "%");
+    }
+
 }

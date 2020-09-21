@@ -1,17 +1,29 @@
 package se.callista.springboot.rest.service;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Visitor;
+import com.querydsl.core.types.dsl.StringExpression;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import se.callista.springboot.rest.api.v1.Bed;
 import se.callista.springboot.rest.api.v1.CareUnit;
 import se.callista.springboot.rest.api.v1.Hospital;
 import se.callista.springboot.rest.domain.BedJPA;
+import se.callista.springboot.rest.domain.CareUnitCriteria;
 import se.callista.springboot.rest.domain.CareUnitJPA;
 import se.callista.springboot.rest.domain.CareUnitRepository;
 import se.callista.springboot.rest.domain.HospitalJPA;
 import se.callista.springboot.rest.domain.HospitalRepository;
+import se.callista.springboot.rest.domain.QBedJPA;
+import se.callista.springboot.rest.domain.QCareUnitJPA;
 import se.callista.springboot.rest.exception.NotFoundException;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -28,13 +40,17 @@ public class CareUnitService {
     @Autowired
     CareUnitMapper careUnitMapper;
 
-    public List<CareUnit> findAll() {
-        List<CareUnitJPA> careunits = StreamSupport.stream(careUnitRepository.findAll().spliterator(),false).collect(Collectors.toList());
+    public Page<CareUnit> findAll(CareUnitCriteria criteria, Pageable pageable) {
+        Predicate predicate = buildPredicate(criteria);
+        Page<CareUnitJPA> careunits = null;
+        if (predicate == null) {
+            careunits = careUnitRepository.findAll(pageable);
+        } else {
+            careunits = careUnitRepository.findAll(predicate, pageable);
+        }
 
         //Transform to DTO's
-        List<CareUnit> returnHospitals = careUnitMapper.toListDTOs(careunits);
-
-        return returnHospitals;
+        return new PageImpl<CareUnit>(careUnitMapper.toListDTOs(careunits.getContent()), pageable, careunits.getTotalElements());
     }
 
     public CareUnit findOne(long id) {
@@ -64,5 +80,23 @@ public class CareUnitService {
 
     public void delete(Long id) {
         careUnitRepository.deleteById(id);
+    }
+
+    private Predicate buildPredicate(CareUnitCriteria criteria) {
+        BooleanBuilder builder = new BooleanBuilder();
+        QCareUnitJPA careUnit = QCareUnitJPA.careUnitJPA;
+
+        if (criteria != null) {
+            if (criteria.getName() != null) {
+                builder.and(careUnit.name.containsIgnoreCase(criteria.getName()));
+            }
+            if (criteria.getPhoneNumber() != null) {
+                builder.and(careUnit.phoneNumber.containsIgnoreCase(criteria.getPhoneNumber()));
+            }
+            if (criteria.getEmail() != null) {
+                builder.and(careUnit.email.containsIgnoreCase(criteria.getEmail()));
+            }
+        }
+        return builder.getValue();
     }
 }

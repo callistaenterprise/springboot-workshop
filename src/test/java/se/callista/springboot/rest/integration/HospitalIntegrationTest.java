@@ -24,6 +24,7 @@ import se.callista.springboot.rest.domain.HospitalJPA;
 import se.callista.springboot.rest.domain.HospitalRepository;
 import se.callista.springboot.rest.exception.RestErrorResponse;
 import se.callista.springboot.rest.service.HospitalMapper;
+import se.callista.springboot.rest.util.RestResponsePage;
 
 import java.net.URI;
 import java.util.List;
@@ -57,17 +58,37 @@ public class HospitalIntegrationTest {
         HospitalJPA hospital1 = insertOneHospital();
 
         // Set values and make call
-        ParameterizedTypeReference<List<Hospital>> ptr =
+        ParameterizedTypeReference<RestResponsePage<Hospital>> ptr =
                 new ParameterizedTypeReference<>() { };
         URI targetUrl = UriComponentsBuilder.fromUriString("/api/v1/hospital")
                 .build()
                 .toUri();
-        ResponseEntity<List<Hospital>> hospitals = template.exchange(targetUrl, HttpMethod.GET, null, ptr);
+        ResponseEntity<RestResponsePage<Hospital>> hospitals = template.exchange(targetUrl, HttpMethod.GET, null, ptr);
 
         // Assert
         assertEquals(HttpStatus.OK.value(), hospitals.getStatusCodeValue());
         assertEquals(MediaType.APPLICATION_JSON, hospitals.getHeaders().getContentType());
-        assertEquals("SU", hospitals.getBody().get(0).getName());
+        assertEquals("SU", hospitals.getBody().getContent().get(0).getName());
+    }
+
+    @Test
+    public void testGetSome() {
+        // Set db values
+        insertFiveHospitals();
+
+        // Set values and make call
+        ParameterizedTypeReference<RestResponsePage<Hospital>> ptr =
+                new ParameterizedTypeReference<>() { };
+        URI targetUrl = UriComponentsBuilder.fromUriString("/api/v1/hospital")
+                .queryParam("name", "S")
+                .build()
+                .toUri();
+        ResponseEntity<RestResponsePage<Hospital>> hospitals = template.exchange(targetUrl, HttpMethod.GET, null, ptr);
+
+        // Assert
+        assertEquals(HttpStatus.OK.value(), hospitals.getStatusCodeValue());
+        assertEquals(MediaType.APPLICATION_JSON, hospitals.getHeaders().getContentType());
+        assertEquals(2, hospitals.getBody().getContent().size());
     }
 
     @Test
@@ -261,5 +282,14 @@ public class HospitalIntegrationTest {
         HospitalJPA hospital = new HospitalJPA("SU", "Gbg");
         return hospitalRepository.save(hospital);
     }
+
+    private void insertFiveHospitals() {
+        hospitalRepository.save(new HospitalJPA("SU", "Gbg"));
+        hospitalRepository.save(new HospitalJPA("SÄS", "Borås"));
+        hospitalRepository.save(new HospitalJPA("NU", "Utby"));
+        hospitalRepository.save(new HospitalJPA("UA", "Uddevalla"));
+        hospitalRepository.save(new HospitalJPA("XX", "XKöping"));
+    }
+
 }
 

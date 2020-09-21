@@ -11,15 +11,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import se.callista.springboot.rest.api.v1.Hospital;
+import se.callista.springboot.rest.domain.HospitalCriteria;
 import se.callista.springboot.rest.domain.HospitalJPA;
 import se.callista.springboot.rest.domain.HospitalRepository;
 import se.callista.springboot.rest.exception.NotFoundException;
 
 
 import javax.transaction.Transactional;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -48,11 +49,11 @@ public class HospitalServiceTest {
     @Test
     public void insertOne_findAll() {
         HospitalJPA initHospital = insertOneHospital();
+        Page<Hospital> readHospitals = hospitalService.findAll(new HospitalCriteria(), PageRequest.of(0,20));
 
-        List<Hospital> readHospitals = hospitalService.findAll();
-
-        assertEquals(1, readHospitals.size());
-        assertEquals(NAME_ONE, readHospitals.get(0).getName());
+        assertNotNull(readHospitals.getContent());
+        assertEquals(1, readHospitals.getContent().size());
+        assertEquals(NAME_ONE, readHospitals.getContent().get(0).getName());
     }
 
     @Test

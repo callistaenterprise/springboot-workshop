@@ -3,6 +3,8 @@ package se.callista.springboot.rest.api.v1;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import se.callista.springboot.rest.domain.BedJPA;
+import se.callista.springboot.rest.domain.CareUnitCriteria;
 import se.callista.springboot.rest.domain.CareUnitJPA;
 import se.callista.springboot.rest.exception.RestClientException;
 import se.callista.springboot.rest.service.BedService;
@@ -32,9 +35,14 @@ public class CareUnitController {
     private MessageSource messageSource;
 
     @RequestMapping(value = "/careunit", method = RequestMethod.GET)
-    public ResponseEntity<List<CareUnit>> listCareunits()
+    public ResponseEntity<Page<CareUnit>> listCareunits(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "phonenumber", required = false) String phonenumber,
+            @RequestParam(value = "email", required = false) String email,
+            Pageable pageable)
     {
-        List<CareUnit> careunits = careUnitService.findAll();
+        CareUnitCriteria criteria = new CareUnitCriteria(name, phonenumber, email);
+        Page<CareUnit> careunits = careUnitService.findAll(criteria, pageable);
         return new ResponseEntity<>(careunits, HttpStatus.OK);
     }
 

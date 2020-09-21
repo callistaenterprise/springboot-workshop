@@ -3,18 +3,21 @@ package se.callista.springboot.rest.api.v1;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import se.callista.springboot.rest.exception.RestClientException;
+import se.callista.springboot.rest.domain.HospitalCriteria;
 import se.callista.springboot.rest.service.HospitalService;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -28,9 +31,13 @@ public class HospitalController {
     private MessageSource messageSource;
 
     @RequestMapping(value = "/hospital", method = RequestMethod.GET)
-    public ResponseEntity<List<Hospital>> listHospitals()
+    public ResponseEntity<Page<Hospital>> listHospitals(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "address", required = false) String address,
+            Pageable pageable)
     {
-        List<Hospital> hospitals = hospitalService.findAll();
+        HospitalCriteria criteria = new HospitalCriteria(name, address);
+        Page<Hospital> hospitals = hospitalService.findAll(criteria, pageable);
         return new ResponseEntity<>(hospitals, HttpStatus.OK);
     }
 
