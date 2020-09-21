@@ -7,6 +7,7 @@ import se.callista.springboot.rest.api.v1.Hospital;
 import se.callista.springboot.rest.domain.BedJPA;
 import se.callista.springboot.rest.domain.HospitalJPA;
 import se.callista.springboot.rest.domain.HospitalRepository;
+import se.callista.springboot.rest.exception.NotFoundException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public class HospitalService {
     }
 
     public Hospital findOne(long id) {
-        HospitalJPA hospital = hospitalRepository.findById(id).orElse(null);
+        HospitalJPA hospital = hospitalRepository.findById(id).orElseThrow(() -> new NotFoundException("Hospital", Long.toString(id)));
         return hospitalMapper.toDTO(hospital);
     }
 
@@ -49,10 +50,16 @@ public class HospitalService {
         // Transform from DTO
         HospitalJPA hospitalJPA = hospitalMapper.fromDTO(hospital);
 
+        // Check that this hospital exist. We may or may not check this depending on strategy on updates that becomes saves...
+        hospitalRepository.findById(hospitalJPA.getId()).orElseThrow(() -> new NotFoundException("Hospital", Long.toString(hospitalJPA.getId())));
+
         hospitalRepository.save(hospitalJPA);
     }
 
     public void delete(Long id) {
+        // Check if the record exist, if not throw NotFoundException
+        hospitalRepository.findById(id).orElseThrow(() -> new NotFoundException("Hospital", Long.toString(id)));
+
         hospitalRepository.deleteById(id);
     }
 }

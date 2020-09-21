@@ -3,6 +3,7 @@ package se.callista.springboot.rest.domain;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Entity
 @Table(name = "Bed")
+@EqualsAndHashCode(exclude = "careunit")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class BedJPA {
     @Id

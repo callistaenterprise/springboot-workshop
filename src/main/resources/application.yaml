@@ -4,6 +4,14 @@ spring:
   application:
       name: rest
 
+logging:
+  level:
+    com:
+      callista:
+        springboot:
+          rest:
+            api:
+              v1: DEBUG
 ---
 spring:
   profiles: dev

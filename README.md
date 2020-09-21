@@ -97,3 +97,27 @@ When using an application it is often very useful to load some example data, esp
 
 The loading of the example data is tied to the Spring profile example, look at the beginning of the file.
 
+## Step 5 ##
+Logging and error handling
+
+### Logging ###
+We have added some logging for new incoming data and we are using the Lombok @Slf4j annotation.
+
+### Error handling ###
+We have added a new dependency to Spring Boot starter validation in the build gradle file.
+After this we annotate beans with the @NotEmpty annotation (DTO classes).
+
+In our controllers we  annotate incoming request bodies with the @Valid annotation to check that all constraints are met.
+
+This play along fine with our new GlobalExceptionHandlers method handleMethodArgumentNotValid and we can easily return custom made error strings!
+If you want to validate for example am enum this way look at https://www.baeldung.com/javax-validations-enums
+
+The custom made error string are introduced in the message.properties file and the usage of these are configured in the CustomMessageSourceConfiguration.
+
+We have also added some new tests that will catch different errors.
+
+1. Test to run the application and omit data or enter wrong data to see the errors in the responses.
+
+
+
+

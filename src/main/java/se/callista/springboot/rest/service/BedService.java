@@ -7,6 +7,7 @@ import se.callista.springboot.rest.domain.BedJPA;
 import se.callista.springboot.rest.domain.BedRepository;
 import se.callista.springboot.rest.domain.CareUnitJPA;
 import se.callista.springboot.rest.domain.CareUnitRepository;
+import se.callista.springboot.rest.exception.NotFoundException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +35,7 @@ public class BedService {
     }
 
     public Bed findOne(long id) {
-        BedJPA bed = bedRepository.findById(id).orElse(null);
+        BedJPA bed = bedRepository.findById(id).orElseThrow(() -> new NotFoundException("Bed", Long.toString(id)));
         return bedMapper.toDTO(bed);
     }
 
@@ -42,7 +43,7 @@ public class BedService {
         // Transform from DTO
         BedJPA bedJPA = bedMapper.fromDTO(bed);
 
-        CareUnitJPA careunit = careUnitRepository.findById(careunitId).orElse(null);
+        CareUnitJPA careunit = careUnitRepository.findById(careunitId).orElseThrow(() -> new NotFoundException("Careunit", Long.toString(careunitId)));
         bedJPA.setCareunit(careunit);
 
         BedJPA savedBedJPA = bedRepository.save(bedJPA);

@@ -10,6 +10,7 @@ import se.callista.springboot.rest.domain.CareUnitJPA;
 import se.callista.springboot.rest.domain.CareUnitRepository;
 import se.callista.springboot.rest.domain.HospitalJPA;
 import se.callista.springboot.rest.domain.HospitalRepository;
+import se.callista.springboot.rest.exception.NotFoundException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ public class CareUnitService {
     }
 
     public CareUnit findOne(long id) {
-        CareUnitJPA careunit = careUnitRepository.findById(id).orElse(null);
+        CareUnitJPA careunit = careUnitRepository.findById(id).orElseThrow(() -> new NotFoundException("Careunit", Long.toString(id)));
         return careUnitMapper.toDTO(careunit);
     }
 
@@ -45,7 +46,7 @@ public class CareUnitService {
         // Transform from DTO
         CareUnitJPA careunitJPA = careUnitMapper.fromDTO(careunit);
 
-        HospitalJPA hospital = hospitalRepository.findById(hospitalId).orElse(null);
+        HospitalJPA hospital = hospitalRepository.findById(hospitalId).orElseThrow(() -> new NotFoundException("Hospital", Long.toString(hospitalId)));
         careunitJPA.setHospital(hospital);
 
         CareUnitJPA savedCareunitJPA = careUnitRepository.save(careunitJPA);

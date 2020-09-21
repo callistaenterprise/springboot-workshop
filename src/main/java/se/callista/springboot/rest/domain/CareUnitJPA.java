@@ -22,7 +22,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "careunit")
-@EqualsAndHashCode(exclude = "beds")
+@EqualsAndHashCode(exclude = {"hospital", "beds"} )
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CareUnitJPA {
     @Id

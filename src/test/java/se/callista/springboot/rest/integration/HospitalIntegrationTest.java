@@ -1,5 +1,8 @@
 package se.callista.springboot.rest.integration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -19,6 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import se.callista.springboot.rest.api.v1.Hospital;
 import se.callista.springboot.rest.domain.HospitalJPA;
 import se.callista.springboot.rest.domain.HospitalRepository;
+import se.callista.springboot.rest.exception.RestErrorResponse;
 import se.callista.springboot.rest.service.HospitalMapper;
 
 import java.net.URI;
@@ -67,6 +71,47 @@ public class HospitalIntegrationTest {
     }
 
     @Test
+    public void testGetOne() {
+        // Set db values
+        HospitalJPA hospital1 = insertOneHospital();
+
+        // Set values and make call
+        URI targetUrl = UriComponentsBuilder.fromUriString("/api/v1/hospital")
+                .path("/" + hospital1.getId())
+                .build()
+                .toUri();
+        ResponseEntity<Hospital> hospital = template.exchange(targetUrl, HttpMethod.GET, null, Hospital.class);
+
+        // Assert
+        assertEquals(HttpStatus.OK.value(), hospital.getStatusCodeValue());
+        assertEquals(MediaType.APPLICATION_JSON, hospital.getHeaders().getContentType());
+        assertEquals("SU", hospital.getBody().getName());
+    }
+
+    @Test
+    public void testGetOneNotFound() throws JsonProcessingException {
+        // Set db values
+        HospitalJPA hospital1 = insertOneHospital();
+
+        // Set values and make call
+        URI targetUrl = UriComponentsBuilder.fromUriString("/api/v1/hospital")
+                .path("/" + hospital1.getId() + 5)
+                .build()
+                .toUri();
+        ResponseEntity<String> response = template.exchange(targetUrl, HttpMethod.GET, null, String.class);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCodeValue());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        RestErrorResponse restErrorResponse = mapper.readValue(response.getBody(), RestErrorResponse.class);
+        assertEquals(404, restErrorResponse.getStatus());
+        assertEquals(1, restErrorResponse.getErrors().length);
+    }
+
+
+    @Test
     public void testCreateOne() {
         // Create hospital values
         Hospital hospital1 = new Hospital("SÄS", "Vänersborg");
@@ -85,6 +130,30 @@ public class HospitalIntegrationTest {
         assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
         assertNotNull(response.getBody().getId());
         assertEquals("SÄS", response.getBody().getName());
+    }
+
+    @Test
+    public void testCreateOneInvalidInfo() throws JsonProcessingException {
+        // Create hospital values
+        Hospital hospital1 = new Hospital(null, "Vänersborg");
+
+        // Set values and make call
+        URI targetUrl = UriComponentsBuilder.fromUriString("/api/v1/hospital")
+                .build()
+                .toUri();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Hospital> entity = new HttpEntity<>(hospital1, headers);
+        ResponseEntity<String> response = template.exchange(targetUrl, HttpMethod.POST, entity, String.class);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCodeValue());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        RestErrorResponse restErrorResponse = mapper.readValue(response.getBody(), RestErrorResponse.class);
+        assertEquals(400, restErrorResponse.getStatus());
+        assertEquals(1, restErrorResponse.getErrors().length);
     }
 
     @Test
@@ -117,6 +186,37 @@ public class HospitalIntegrationTest {
     }
 
     @Test
+    public void testUpdateOneWithWrongIdData() throws JsonProcessingException {
+        // Set db values
+        HospitalJPA hospital1 = insertOneHospital();
+
+        // Change  values and make call
+        URI targetUrl = UriComponentsBuilder.fromUriString("/api/v1/hospital")
+                .path("/" + hospital1.getId() + 100)
+                .build()
+                .toUri();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Create updated customer object
+        Hospital hospitalToUpdate = hospitalMapper.toDTO(hospital1);
+        hospitalToUpdate.setName("YetAnother");
+
+        HttpEntity<Hospital> entity = new HttpEntity<>(hospitalToUpdate, headers);
+        ResponseEntity<String> response = template.exchange(targetUrl, HttpMethod.PUT, entity, String.class);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCodeValue());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        RestErrorResponse restErrorResponse = mapper.readValue(response.getBody(), RestErrorResponse.class);
+        assertEquals(400, restErrorResponse.getStatus());
+        assertEquals(1, restErrorResponse.getErrors().length);
+
+    }
+
+    @Test
     public void testDeleteOne() {
         // Set db values
         HospitalJPA hospital1 = insertOneHospital();
@@ -135,6 +235,26 @@ public class HospitalIntegrationTest {
         // Assert change
         HospitalJPA deletedHospital = hospitalRepository.findById(hospital1.getId()).orElse(null);
         assertNull(deletedHospital);
+    }
+
+    @Test
+    public void testDeleteOneNotExisting() throws JsonProcessingException {
+        // Change values and make call
+        URI targetUrl = UriComponentsBuilder.fromUriString("/api/v1/hospital")
+                .path("/" + 100)
+                .build()
+                .toUri();
+
+        ResponseEntity<String> response = template.exchange(targetUrl, HttpMethod.DELETE, null, String.class);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCodeValue());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        RestErrorResponse restErrorResponse = mapper.readValue(response.getBody(), RestErrorResponse.class);
+        assertEquals(404, restErrorResponse.getStatus());
+        assertEquals(1, restErrorResponse.getErrors().length);
     }
 
     private HospitalJPA insertOneHospital() {

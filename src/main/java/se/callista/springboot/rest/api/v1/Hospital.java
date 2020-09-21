@@ -1,29 +1,24 @@
 package se.callista.springboot.rest.api.v1;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import se.callista.springboot.rest.domain.CareUnitJPA;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "careunits")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Hospital {
     private long id;
+    @NotEmpty(message = "{hospital.name.notempty}")
     private String name;
     private String address;
     private Set<CareUnitJPA> careunits = new HashSet<>();

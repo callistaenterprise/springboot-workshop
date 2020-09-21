@@ -13,6 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import se.callista.springboot.rest.api.v1.Hospital;
 import se.callista.springboot.rest.domain.HospitalJPA;
 import se.callista.springboot.rest.domain.HospitalRepository;
+import se.callista.springboot.rest.exception.NotFoundException;
 
 
 import javax.transaction.Transactional;
@@ -70,9 +71,18 @@ public class HospitalServiceTest {
 
         hospitalService.delete(initHospital.getId());
 
-        Hospital readHospital = hospitalService.findOne(initHospital.getId());
-        assertEquals(null, readHospital);
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            hospitalService.findOne(initHospital.getId());
+        });
      }
+
+    @Test
+    public void insertOne_deleteNonExistent() {
+        HospitalJPA initHospital = insertOneHospital();
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            hospitalService.delete(initHospital.getId() + 100);
+        });
+    }
 
     @Test
     public void insertOne_updateIt() {
