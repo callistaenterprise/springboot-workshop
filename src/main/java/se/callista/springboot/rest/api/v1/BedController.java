@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import se.callista.springboot.rest.domain.BedJPA;
 import se.callista.springboot.rest.service.BedService;
@@ -34,8 +35,9 @@ public class BedController {
     }
 
     @RequestMapping(value = "/bed", method = RequestMethod.POST)
-    public ResponseEntity<BedJPA> createBed(@RequestBody BedJPA bed) {
-        BedJPA savedBed = bedService.save(bed);
+    public ResponseEntity<BedJPA> createBed(@RequestBody BedJPA bed,
+                                            @RequestParam(value = "careunitId", required = true) Long careunitId) {
+        BedJPA savedBed = bedService.save(careunitId, bed);
         return new ResponseEntity<>(savedBed, HttpStatus.OK);
     }
 

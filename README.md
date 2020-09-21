@@ -55,3 +55,24 @@ We will also have repository classes in this directory.
 1. Select BED and get all records.
 
 1. Simplify the JDBC URL by adding a H2 property in the application properties! (Uncomment)
+
+## Step 2 ##
+
+### Added structure ###
+we have added a structure for our entities as follows:
+
+Hospital --> Care Unit --> Bed
+
+Please note the dependency between Hospital, Care Unit and Bed expressed by @OneToMany and @ManyToOne annotations.
+To be sure to not get circular dependencies we have also Json annotations as @JsonManagedReference and @JsonBackReference
+
+### Added OAS ###
+By adding a dependency to Open Api (https://www.openapis.org/) we can now more easily interact with our APIs.
+We have set a property to make the call to make the UI look like swagger.
+
+1. Try accessing the URL at: http://localhost:8080/swagger-ui.html
+
+### Simple Tests ###
+We have also added some simple tests for the Hospital controller and service.
+
+1. Test to run the testsuite
