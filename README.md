@@ -83,3 +83,17 @@ We have also added some simple tests for the Hospital controller and service.
 We don't want to expose database entities in the API-layer. This we solve by introducing DTOs.
 
 Here we will use a mapper tool called MapStruct that maps between entities and DTOs.
+
+## Step 4 ##
+Using Spring profiles and loading example data
+
+### Spring profiles ###
+We now convert our application.properties to application.yaml. This to make it easier to use Spring profiles.
+
+1. Look att application.yaml!
+
+### Example data ###
+When using an application it is often very useful to load some example data, especially if the data should be shown in a GUI!
+
+The loading of the example data is tied to the Spring profile example, look at the beginning of the file.
+
